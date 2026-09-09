@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rekap Anggota Bulanan</title>
+  <style>
+    :root{
+      --bg:#f6f7f9;
+      --card:#ffffff;
+      --text:#171717;
+      --muted:#737373;
+      --line:#e5e7eb;
+      --soft:#f5f5f5;
+      --dark:#171717;
+      --danger:#b91c1c;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .container{
+      width:min(1400px, 100%);
+      margin:0 auto;
+      padding:24px;
+    }
+
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:16px;
+      flex-wrap:wrap;
+      margin-bottom:20px;
+    }
+
+    .title-wrap h1{
+      margin:0 0 6px;
+      font-size:clamp(24px, 3vw, 34px);
+      line-height:1.1;
+    }
+
+    .subtitle{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .month-control{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      min-width:210px;
+    }
+
+    .month-control label{
+      font-size:13px;
+      font-weight:700;
+      color:#404040;
+      white-space:nowrap;
+    }
+
+    input[type="month"]{
+      width:100%;
+      border:0;
+      outline:none;
+      background:transparent;
+      color:var(--text);
+      font:inherit;
+    }
+
+    .export-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid #dc2626;
+      background:#dc2626;
+      color:white;
+      border-radius:12px;
+      padding:11px 14px;
+      font:inherit;
+      font-size:13px;
+      font-weight:750;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .export-btn:hover{background:#b91c1c;border-color:#b91c1c}
+
+    .members{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:16px;
+    }
+
+    .member-card{
+      --member-color:#111827;
+      --member-soft:#f3f4f6;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-top:4px solid var(--member-color);
+      border-radius:16px;
+      overflow:hidden;
+      min-width:0;
+      box-shadow:0 1px 2px rgba(0,0,0,.03);
+    }
+
+    .member-card[data-member="Ernest"]{
+      --member-color:#2563eb;
+      --member-soft:#eff6ff;
+    }
+
+    .member-card[data-member="Arief"]{
+      --member-color:#059669;
+      --member-soft:#ecfdf5;
+    }
+
+    .member-card[data-member="Dilla"]{
+      --member-color:#db2777;
+      --member-soft:#fdf2f8;
+    }
+
+    .member-card[data-member="Fauzan"]{
+      --member-color:#d97706;
+      --member-soft:#fffbeb;
+    }
+
+    .member-card[data-member="Fikri"]{
+      --member-color:#7c3aed;
+      --member-soft:#f5f3ff;
+    }
+
+    .member-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding:15px 16px;
+      border-bottom:1px solid var(--line);
+      background:var(--member-soft);
+    }
+
+    .member-name{
+      font-size:17px;
+      font-weight:800;
+      color:var(--member-color);
+    }
+
+    .member-period{
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .table-wrap{
+      width:100%;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    table{
+      width:100%;
+      min-width:640px;
+      border-collapse:collapse;
+    }
+
+    th, td{
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      font-size:13px;
+      vertical-align:middle;
+    }
+
+    th{
+      background:var(--member-soft);
+      color:#404040;
+      font-weight:750;
+    }
+
+    th.no, td.no{
+      width:56px;
+      text-align:center;
+    }
+
+    td[contenteditable="true"]{
+      outline:none;
+      min-width:120px;
+    }
+
+    td[contenteditable="true"]:focus{
+      background:#fffbea;
+      box-shadow:inset 0 0 0 1px #eab308;
+    }
+
+    select{
+      width:100%;
+      min-width:110px;
+      border:1px solid var(--line);
+      border-radius:8px;
+      background:white;
+      padding:7px 8px;
+      font:inherit;
+      color:var(--text);
+      outline:none;
+    }
+
+    .actions{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      padding:12px;
+      background:#fff;
+    }
+
+    .action-left{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:1px solid var(--line);
+      background:white;
+      color:var(--text);
+      border-radius:9px;
+      padding:8px 10px;
+      cursor:pointer;
+      font:inherit;
+      font-size:12px;
+      font-weight:650;
+    }
+
+    button:hover{background:var(--soft)}
+
+    .primary{
+      background:var(--member-color);
+      color:white;
+      border-color:var(--member-color);
+    }
+
+    .danger{
+      color:var(--danger);
+    }
+
+    .save-note{
+      position:fixed;
+      right:20px;
+      bottom:20px;
+      background:#171717;
+      color:#fff;
+      padding:10px 14px;
+      border-radius:10px;
+      font-size:12px;
+      box-shadow:0 8px 30px rgba(0,0,0,.14);
+      display:none;
+      z-index:99;
+    }
+
+    @media (max-width: 900px){
+      .members{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 640px){
+      .container{
+        padding:14px;
+      }
+
+      .header{
+        align-items:stretch;
+      }
+
+      .top-actions{
+        width:100%;
+      }
+
+      .month-control{
+        flex:1;
+        min-width:0;
+      }
+
+      .export-btn{
+        width:100%;
+        justify-content:center;
+      }
+
+      .member-head{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .actions{
+        align-items:stretch;
+      }
+
+      .action-left,
+      .actions > button{
+        width:100%;
+      }
+
+      .action-left button{
+        flex:1;
+      }
+
+      table{
+        min-width:580px;
+      }
+    }
+
+    @media print{
+      @page{
+        size:A4;
+        margin:12mm;
+      }
+
+      body{
+        background:white;
+      }
+
+      .container{
+        width:100%;
+        max-width:none;
+        padding:0;
+      }
+
+      .header{
+        margin-bottom:14px;
+      }
+
+      .top-actions,
+      .actions,
+      .save-note,
+      .subtitle{
+        display:none !important;
+      }
+
+      .title-wrap h1{
+        font-size:22px;
+        margin-bottom:2px;
+      }
+
+      .members{
+        display:block;
+      }
+
+      .member-card{
+        margin-bottom:14px;
+        box-shadow:none;
+        break-inside:avoid;
+        page-break-inside:avoid;
+      }
+
+      .table-wrap{
+        overflow:visible;
+      }
+
+      table{
+        min-width:0;
+      }
+
+      th, td{
+        font-size:10px;
+        padding:6px 7px;
+      }
+
+      select{
+        appearance:none;
+        -webkit-appearance:none;
+        border:0;
+        padding:0;
+        background:transparent;
+        font-size:10px;
+      }
+
+      td[contenteditable="true"]{
+        min-width:0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div class="title-wrap">
+        <h1>Rekap Anggota</h1>
+        <div class="subtitle">Rekap pekerjaan anggota berdasarkan bulan.</div>
+      </div>
+
+      <div class="top-actions">
+        <div class="month-control">
+          <label for="month">Bulan</label>
+          <input id="month" type="month" />
+        </div>
+
+        <button class="export-btn" id="exportPdf">
+          Export PDF
+        </button>
+      </div>
+    </header>
+
+    <section class="members" id="members"></section>
+  </main>
+
+  <div class="save-note" id="saveNote">Perubahan tersimpan.</div>
+
+  <script>
+    const members = ["Ernest", "Arief", "Dilla", "Fauzan", "Fikri"];
+    const statuses = ["Belum", "Proses", "Tertunda", "Selesai"];
+
+    const monthInput = document.getElementById("month");
+    const membersEl = document.getElementById("members");
+    const saveNote = document.getElementById("saveNote");
+    const exportPdf = document.getElementById("exportPdf");
+
+    const now = new Date();
+    monthInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+
+    function storageKey(member){
+      return `rekap-anggota-${monthInput.value}-${member}`;
+    }
+
+    function defaultRows(member){
+      const examples = {
+        Ernest: [{ kegiatan: "Contoh tugas Ernest", status: "Proses", catatan: "" }],
+        Arief: [{ kegiatan: "Contoh tugas Arief", status: "Belum", catatan: "" }],
+        Dilla: [{ kegiatan: "Contoh tugas Dilla", status: "Selesai", catatan: "" }],
+        Fauzan: [{ kegiatan: "Contoh tugas Fauzan", status: "Tertunda", catatan: "" }],
+        Fikri: [{ kegiatan: "Contoh tugas Fikri", status: "Proses", catatan: "" }]
+      };
+      return examples[member] || [{ kegiatan:"", status:"Belum", catatan:"" }];
+    }
+
+    function getRows(member){
+      const saved = localStorage.getItem(storageKey(member));
+      return saved ? JSON.parse(saved) : defaultRows(member);
+    }
+
+    function statusOptions(selected){
+      return statuses.map(status =>
+        `<option value="${status}" ${status === selected ? "selected" : ""}>${status}</option>`
+      ).join("");
+    }
+
+    function getPeriodLabel(){
+      const [year, month] = monthInput.value.split("-");
+      return new Date(Number(year), Number(month)-1, 1)
+        .toLocaleDateString("id-ID", {month:"long", year:"numeric"});
+    }
+
+    function renderRow(row, index){
+      return `
+        <tr>
+          <td class="no">${index + 1}</td>
+          <td contenteditable="true">${escapeHtml(row.kegiatan || "")}</td>
+          <td>
+            <select aria-label="Status">
+              ${statusOptions(row.status || "Belum")}
+            </select>
+          </td>
+          <td contenteditable="true">${escapeHtml(row.catatan || "")}</td>
+        </tr>`;
+    }
+
+    function escapeHtml(text){
+      return String(text)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function collectRows(card){
+      return [...card.querySelectorAll("tbody tr")].map(tr => {
+        const cells = tr.querySelectorAll("td");
+        return {
+          kegiatan: cells[1].innerText.trim(),
+          status: tr.querySelector("select").value,
+          catatan: cells[3].innerText.trim()
+        };
+      });
+    }
+
+    function saveMember(member, card){
+      localStorage.setItem(storageKey(member), JSON.stringify(collectRows(card)));
+      showSaved();
+    }
+
+    function saveAll(){
+      document.querySelectorAll(".member-card").forEach(card => {
+        const member = card.dataset.member;
+        saveMember(member, card);
+      });
+    }
+
+    function showSaved(){
+      saveNote.style.display = "block";
+      clearTimeout(window.__saveTimer);
+      window.__saveTimer = setTimeout(() => {
+        saveNote.style.display = "none";
+      }, 1400);
+    }
+
+    function renumber(card){
+      card.querySelectorAll("tbody tr").forEach((tr, index) => {
+        tr.querySelector(".no").textContent = index + 1;
+      });
+    }
+
+    function addRow(member, card){
+      const tbody = card.querySelector("tbody");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="no"></td>
+        <td contenteditable="true"></td>
+        <td>
+          <select aria-label="Status">
+            ${statusOptions("Belum")}
+          </select>
+        </td>
+        <td contenteditable="true"></td>`;
+      tbody.appendChild(tr);
+      renumber(card);
+      bindRowEvents(member, card, tr);
+      saveMember(member, card);
+    }
+
+    function removeRow(member, card){
+      const rows = card.querySelectorAll("tbody tr");
+      if(rows.length > 1){
+        rows[rows.length - 1].remove();
+        renumber(card);
+        saveMember(member, card);
+      }
+    }
+
+    function bindRowEvents(member, card, row){
+      row.querySelectorAll('[contenteditable="true"]').forEach(cell => {
+        cell.addEventListener("blur", () => saveMember(member, card));
+      });
+
+      row.querySelector("select").addEventListener("change", () => {
+        saveMember(member, card);
+      });
+    }
+
+    function render(){
+      membersEl.innerHTML = "";
+      const period = getPeriodLabel();
+
+      members.forEach(member => {
+        const rows = getRows(member);
+        const card = document.createElement("article");
+        card.className = "member-card";
+        card.dataset.member = member;
+
+        card.innerHTML = `
+          <div class="member-head">
+            <div class="member-name">${member}</div>
+            <div class="member-period">${period}</div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="no">No.</th>
+                  <th>Kegiatan / Tugas</th>
+                  <th>Status</th>
+                  <th>Catatan</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows.map((row, index) => renderRow(row, index)).join("")}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="actions">
+            <div class="action-left">
+              <button class="add">+ Tambah Baris</button>
+              <button class="remove danger">Hapus Baris</button>
+            </div>
+            <button class="save primary">Simpan</button>
+          </div>
+        `;
+
+        card.querySelectorAll("tbody tr").forEach(row => {
+          bindRowEvents(member, card, row);
+        });
+
+        card.querySelector(".add").addEventListener("click", () => addRow(member, card));
+        card.querySelector(".remove").addEventListener("click", () => removeRow(member, card));
+        card.querySelector(".save").addEventListener("click", () => saveMember(member, card));
+
+        membersEl.appendChild(card);
+      });
+    }
+
+    monthInput.addEventListener("change", render);
+
+    exportPdf.addEventListener("click", () => {
+      saveAll();
+      const oldTitle = document.title;
+      document.title = `Rekap Anggota - ${getPeriodLabel()}`;
+      window.print();
+      setTimeout(() => {
+        document.title = oldTitle;
+      }, 500);
+    });
+
+    render();
+  </script>
+</body>
+</html>
