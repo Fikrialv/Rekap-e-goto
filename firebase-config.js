@@ -1,13 +1,13 @@
-// Firebase Web App configuration.
-// Nilai ini boleh berada di frontend; keamanan data wajib dijaga melalui Firestore Rules.
-// Ganti seluruh nilai GANTI_... dengan konfigurasi dari:
-// Firebase Console -> Project settings -> Your apps -> Web app -> SDK setup and configuration.
+// Firebase Web App configuration for Rekap E-GOTO.
+// Firebase Web config memang digunakan di frontend.
+// Keamanan data tetap dikendalikan melalui Firebase Authentication + Firestore Rules.
 
 export const firebaseConfig = {
-  apiKey: "GANTI_API_KEY",
-  authDomain: "GANTI_PROJECT_ID.firebaseapp.com",
-  projectId: "GANTI_PROJECT_ID",
-  storageBucket: "GANTI_PROJECT_ID.firebasestorage.app",
-  messagingSenderId: "GANTI_MESSAGING_SENDER_ID",
-  appId: "GANTI_APP_ID"
+  apiKey: "AIzaSyCUkUxqDBYBdfB18OWIM5dzJz9b6lMFmPw",
+  authDomain: "rekap-e-goto.firebaseapp.com",
+  projectId: "rekap-e-goto",
+  storageBucket: "rekap-e-goto.firebasestorage.app",
+  messagingSenderId: "172827139410",
+  appId: "1:172827139410:web:6412c7ec93f2c4c6972e8b",
+  measurementId: "G-EDM52N4VJE"
 };
