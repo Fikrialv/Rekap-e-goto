@@ -1,70 +1,104 @@
 # Rekap E-GOTO — Firebase Firestore
 
-Rekap bulanan anggota E-GOTO yang di-host gratis di GitHub Pages dan disinkronkan realtime melalui Firebase Firestore.
+Website rekap bulanan anggota E-GOTO yang di-host gratis melalui GitHub Pages dan disinkronkan realtime menggunakan Firebase Firestore.
+
+## Anggota
+- Ernest
+- Arief
+- Dilla
+- Fauzan
+- Fikri
 
 ## Fitur
-- Ernest, Arief, Dilla, Fauzan, Fikri
 - Tabel berbeda untuk setiap anggota
 - Pilihan bulan
 - Nomor otomatis
 - Status: Belum, Proses, Tertunda, Selesai
 - Tambah / hapus baris
 - Sinkron realtime antar HP/laptop
-- Login Firebase Authentication
+- Firebase Authentication
 - Export PDF
 - Responsive mobile, tablet, laptop, desktop
+- Warna identitas berbeda untuk setiap anggota
 
-## 1. Buat Firebase Project
+## Firebase yang digunakan
+Project Firebase sudah dikonfigurasi di `firebase-config.js`.
+
+Akses aplikasi dibatasi ke satu akun tim Firebase Authentication:
+
+`egotosecond@gmail.com`
+
+Password **tidak disimpan di repository**. Masukkan password hanya pada halaman login aplikasi.
+
+## 1. Aktifkan Firebase Authentication
 1. Buka Firebase Console.
-2. Buat project baru.
-3. Tambahkan **Web App**.
-4. Salin `firebaseConfig`.
-5. Edit `firebase-config.js` dan ganti seluruh nilai `GANTI_...`.
+2. Masuk ke project `rekap-e-goto`.
+3. Build -> Authentication -> Get started.
+4. Sign-in method -> aktifkan **Email/Password**.
+5. Authentication -> Users -> Add user.
+6. Buat user dengan email `egotosecond@gmail.com` dan password khusus aplikasi.
 
-## 2. Aktifkan Firestore
+## 2. Buat Firestore Database
 1. Firebase Console -> Build -> Firestore Database.
-2. Create database.
-3. Pilih lokasi yang paling dekat / sesuai kebutuhan.
-4. Setelah database jadi, buka tab **Rules**.
-5. Salin isi `firestore.rules`.
-6. Ganti lima email contoh dengan email asli anggota tim.
-7. Publish rules.
+2. Klik **Create database**.
+3. Pilih lokasi yang sesuai.
+4. Setelah database aktif, buka tab **Rules**.
+5. Salin isi file `firestore.rules` dari repository.
+6. Klik **Publish**.
 
-Jangan gunakan rule `allow read, write: if true` pada website publik.
+Rules hanya mengizinkan akun Firebase Authentication `egotosecond@gmail.com` untuk membaca dan menulis collection `rekap`.
 
-## 3. Aktifkan Login
-1. Firebase Console -> Build -> Authentication.
-2. Klik **Get started**.
-3. Sign-in method -> aktifkan **Email/Password**.
-4. Authentication -> Users -> buat 5 user tim secara manual.
-5. Gunakan email yang sama dengan yang dimasukkan ke `firestore.rules`.
+Jangan gunakan rule publik seperti:
 
-Website ini tidak menyediakan registrasi user publik.
+```text
+allow read, write: if true;
+```
 
-## 4. Authorized Domain
-Di Authentication -> Settings -> Authorized domains, tambahkan:
+## 3. Authorized Domain
+Firebase Console -> Authentication -> Settings -> Authorized domains.
+
+Pastikan domain berikut tersedia:
 
 `fikrialv.github.io`
 
-## 5. GitHub Pages
-Settings -> Pages -> Deploy from a branch -> `main` -> `/(root)`.
+## 4. GitHub Pages
+Repository:
 
-URL:
+`Fikrialv/Rekap-e-goto`
+
+Buka:
+
+Settings -> Pages -> Build and deployment -> Deploy from a branch
+
+Pilih:
+- Branch: `main`
+- Folder: `/(root)`
+
+Kemudian klik **Save**.
+
+Alamat website:
+
 `https://fikrialv.github.io/Rekap-e-goto/`
 
 ## Struktur Firestore
 
-Collection: `rekap`
+Collection:
 
-Document ID:
+`rekap`
+
+Document ID menggunakan format:
+
 `YYYY-MM__anggota`
 
 Contoh:
 - `2026-09__ernest`
 - `2026-09__arief`
 - `2026-09__dilla`
+- `2026-09__fauzan`
+- `2026-09__fikri`
 
-Isi dokumen:
+Contoh isi dokumen:
+
 ```json
 {
   "member": "Ernest",
@@ -79,4 +113,9 @@ Isi dokumen:
 }
 ```
 
-Listener realtime dipasang langsung pada lima dokumen bulan aktif, sehingga tidak membutuhkan query kompleks atau composite index.
+Website memasang listener realtime pada dokumen bulan aktif sehingga perubahan dari satu perangkat dapat muncul pada perangkat lain yang sedang membuka rekap bulan yang sama.
+
+## Keamanan
+- Jangan commit password Firebase Authentication ke GitHub.
+- Jangan menaruh service account/private key di frontend.
+- Firebase Web config di `firebase-config.js` memang digunakan oleh browser; akses database tetap dibatasi oleh Authentication + Firestore Rules.
