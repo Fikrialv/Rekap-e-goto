@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null && request.auth.token.email != null;
+    }
+
+    function teamEmail() {
+      return request.auth.token.email in [
+        "ganti-email-ernest@example.com",
+        "ganti-email-arief@example.com",
+        "ganti-email-dilla@example.com",
+        "ganti-email-fauzan@example.com",
+        "ganti-email-fikri@example.com"
+      ];
+    }
+
+    match /rekap/{rekapId} {
+      allow read, write: if signedIn() && teamEmail();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
